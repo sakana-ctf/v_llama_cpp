@@ -38,7 +38,7 @@ pub fn ez_load_model(path string, gpu_layers int, n_ctx int, n_batch int) !Conte
 	mut ctx_params := context_default_params()
 	ctx_params.n_ctx = n_ctx
 	ctx_params.n_batch = n_batch
-	ctx_params.embeddings = true
+
 	model := load_model_from_file(path, model_params) or {
 		return error('[Error] ./v_llama_cpp/ez_llama.v ez_load_model(): Model loading failed.')
 	}
@@ -138,7 +138,6 @@ pub fn (context Context) new(n_ctx int, n_batch int) !Context {
 	mut ctx_params := context_default_params()
 	ctx_params.n_ctx = n_ctx
 	ctx_params.n_batch = n_batch
-	ctx_params.embeddings = true
 	model := context.model()
 	mut ctx := init_from_model(model, ctx_params) or {
 		return error('[Error] ./v_llama_cpp/ez_llama.v new(): Context loading failed.')
@@ -146,15 +145,4 @@ pub fn (context Context) new(n_ctx int, n_batch int) !Context {
 	return ctx
 }
 
-// get_embeddings tokenizes a string with special tokens and returns the embeddings.
-pub fn (context Context) get_embeddings(token string, add_special bool) ![]f32 {
-	model := context.model()
-	vocab := model.vocab()
-	tokens := Tokens([]Token{ cap: token.len + 10 })
-	n_tokens := vocab.tokenize(token, tokens, token.len + 10, add_special, true) or {
-		return error('[Error] ./v_llama_cpp/ez_llama.v Context.get_embeddings(): Tokenization failed.')
-	}
-	mut batch := tokens.batch_get_one(n_tokens)
-	context.decode(batch)!
-	return get_embeddings(context, model)!
-}
+

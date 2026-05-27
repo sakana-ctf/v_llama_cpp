@@ -22,16 +22,8 @@ fn main() {
 	input_buffer := os.input('>')
 	chat_messages := [
 		ChatMessage{
-			role:    '测试员'
-			content: '123'
-		},
-		ChatMessage{
-			role:    'model'
+			role:    'user'
 			content: input_buffer
-		},
-		ChatMessage{
-			role:    '测试员'
-			content: '哈哈'
 		},
 	]
 	messages := ctx.ez_chat_template(chat_messages) or { panic(err) }

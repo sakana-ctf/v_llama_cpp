@@ -60,19 +60,6 @@ pub fn (context Context) state_load_file(path string) ! {
 	}
 }
 
-// encode processes a batch through the context.
-pub fn (context Context) encode(batch Batch) ! {
-	result := C.llama_encode(context, batch)
-	if result != 0 {
-		return error('[Error] ./v_llama_cpp/struct.v Context.encode(): Prompt processing failed.')
-	}
-}
-
-// get_seq_id returns the sequence ID.
-pub fn (context Context) get_seq_id(seq_id int) {
-	C.llama_get_seq_id(context, seq_id)
-}
-
 /*
 	Model
 */

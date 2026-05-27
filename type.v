@@ -1,6 +1,6 @@
 module v_llama_cpp
 
-pub type Token = i32
+pub type Token = int
 pub type Tokens = []Token
 
 pub type Model = &C.llama_model

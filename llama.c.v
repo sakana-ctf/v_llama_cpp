@@ -26,7 +26,6 @@ struct C.llama_model {}
 struct C.llama_context_params {
 	n_ctx   int
 	n_batch int
-	embeddings	bool
 }
 
 struct C.llama_context {}
@@ -103,8 +102,3 @@ fn C.llama_state_load_file(ctx &C.llama_context,
 	tokens_out &i32,
 	n_token_capacity usize,
 	n_token_count_out &usize) u64
-fn C.llama_n_embd(model &C.llama_model) int
-fn C.llama_encode(ctx &C.llama_context, batch C.llama_batch) int
-fn C.llama_get_embeddings(ctx &C.llama_context) &f32
-fn C.llama_get_seq_id(ctx &C.llama_context, seq_id int)
-
