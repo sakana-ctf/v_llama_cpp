@@ -203,7 +203,7 @@ $if linux {
 $if windows {
 	if system('winget --help') == 0 {
 		download('', 'winget list {pkg}', 'winget install -e --id {pkg}',
-			['Git.Git', 'Kitware.CMake'])
+			['Git.Git', 'BrechtSanders.WinLibs.POSIX.UCRT'])
 	} else {
 		error_msg('Winget is required on Windows to fetch build dependencies. Please install it first.')
 	}
@@ -221,7 +221,10 @@ $if macos {
 	}
 }
 
-find_url := select_fastest_url(git_paths, git_times) or { panic(err) }
+find_url := select_fastest_url(git_paths, git_times) or {
+	panic(err)
+	exit(0)
+}
 url := find_url.split('\t')[0]
 
 if exists(llama_h_path) && find_llama_cpp(find_url, llama_src) {
@@ -234,7 +237,9 @@ if !exists(llama_src) {
 	}
 } else {
 	system('git --git-dir=${llama_src_git} --work-tree=${llama_src} remote set-url origin ${url}')
-	system('git --git-dir=${llama_src_git} --work-tree=${llama_src} pull origin master')
+        system('git --git-dir=${llama_src_git} --work-tree=${llama_src} reset --hard origin/master')
+        system('git --git-dir=${llama_src_git} --work-tree=${llama_src} clean -fd')
+        system('git --git-dir=${llama_src_git} --work-tree=${llama_src} pull origin master')
 }
 
 mut cmake_flags := '-DCMAKE_BUILD_TYPE=Release'
@@ -257,6 +262,10 @@ cmake_flags += ' -DLLAMA_BUILD_TESTS=OFF'
 cmake_flags += ' -DLLAMA_BUILD_SERVER=OFF'
 cmake_flags += ' -DGGML_BUILD_EXAMPLES=OFF'
 cmake_flags += ' -DGGML_BUILD_TESTS=OFF'
+
+$if windows {
+	cmake_flags = '-G "MinGW Makefiles"' + cmake_flags
+}
 
 rmdir_all(llama_build) or {}
 if system('cmake -S "${llama_src}" -B "${llama_build}" ${cmake_flags}') != 0 {
