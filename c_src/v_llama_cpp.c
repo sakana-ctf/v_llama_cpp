@@ -49,7 +49,6 @@ float* v_llama_rag_similarity(const float* query, const float* docs, int dim, in
     
     return scores;
 }
-*/
 
 float* v_llama_rag_similarity(const float* query, const float* docs, int dim, int n_docs) {
     struct ggml_init_params params = {
@@ -73,6 +72,47 @@ float* v_llama_rag_similarity(const float* query, const float* docs, int dim, in
     float* scores = (float*)malloc(n_docs * sizeof(float));
     memcpy(scores, result->data, n_docs * sizeof(float));
     
+    ggml_free(ctx);
+    return scores;
+}
+*/
+
+float* v_llama_rag_similarity(const float* query, const float* docs, int dim, int n_docs) {
+    // 稍微加大一点内存，因为增加了归一化相关的临时张量
+    struct ggml_init_params params = {
+        .mem_size = 16 * 1024 * 1024, 
+        .mem_buffer = NULL,
+        .no_alloc = false,
+    };
+    struct ggml_context* ctx = ggml_init(params);
+     
+    struct ggml_tensor* t_query = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, dim, 1);
+    memcpy(t_query->data, query, dim * sizeof(float));
+     
+    struct ggml_tensor* t_docs = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, dim, n_docs);
+    memcpy(t_docs->data, docs, dim * n_docs * sizeof(float));
+     
+    struct ggml_tensor* eps = ggml_new_f32(ctx, 1e-12f); 
+
+    struct ggml_tensor* t_query_sqr  = ggml_sqr(ctx, t_query);
+    struct ggml_tensor* t_query_sum  = ggml_sum_rows(ctx, t_query_sqr); 
+    struct ggml_tensor* t_query_norm = ggml_sqrt(ctx, ggml_add(ctx, t_query_sum, eps));
+    struct ggml_tensor* t_query_normalized = ggml_div(ctx, t_query, t_query_norm);
+
+    struct ggml_tensor* t_docs_sqr   = ggml_sqr(ctx, t_docs);
+    struct ggml_tensor* t_docs_sum   = ggml_sum_rows(ctx, t_docs_sqr);
+    struct ggml_tensor* t_docs_norm  = ggml_sqrt(ctx, ggml_add(ctx, t_docs_sum, eps));
+    struct ggml_tensor* t_docs_normalized  = ggml_div(ctx, t_docs, t_docs_norm);
+
+    struct ggml_tensor* result = ggml_mul_mat(ctx, t_query_normalized, t_docs_normalized);
+    
+    struct ggml_cgraph* graph = ggml_new_graph(ctx);
+    ggml_build_forward_expand(graph, result);
+    ggml_graph_compute_with_ctx(ctx, graph, 4);
+     
+    float* scores = (float*)malloc(n_docs * sizeof(float));
+    memcpy(scores, result->data, n_docs * sizeof(float));
+     
     ggml_free(ctx);
     return scores;
 }

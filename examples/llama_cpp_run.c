@@ -1,4 +1,4 @@
-//gcc llama_cpp_run.c -o llama_cpp_run -I$HOME/.vmodules/v_llama_cpp/build/include -I$HOME/.vmodules/v_llama_cpp/c_src -L$HOME/.vmodules/v_llama_cpp/build/lib $HOME/.vmodules/v_llama_cpp/c_src/v_llama_cpp.c -lllama -lggml -lggml-base -lggml-cpu -Wl,-rpath,"$HOME/.vmodules/v_llama_cpp/build/bin" -Wl,-rpath,"$HOME/.vmodules/v_llama_cpp/build/lib"
+// gcc llama_cpp_run.c -o llama_cpp_run -I$HOME/.vmodules/v_llama_cpp/build/include -I$HOME/.vmodules/v_llama_cpp/c_src -L$HOME/.vmodules/v_llama_cpp/build/lib $HOME/.vmodules/v_llama_cpp/c_src/v_llama_cpp.c -lllama -lggml -lggml-base -lggml-cpu -Wl,-rpath,"$HOME/.vmodules/v_llama_cpp/build/bin" -Wl,-rpath,"$HOME/.vmodules/v_llama_cpp/build/lib"
 
 #include "v_llama_cpp.h"
 #include <stdio.h>
